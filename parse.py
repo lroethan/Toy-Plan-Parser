@@ -64,21 +64,35 @@ def parse_text(explain_text):
 
 
 explain_text = """
-	+--------------------------+----------+------+--------------------------------------------------------------------+
-	| id                       | count    | task | operator info                                                      |
-	+--------------------------+----------+------+--------------------------------------------------------------------+
-	| HashLeftJoin_13          | 12487.50 | root | inner join, inner:TableReader_17, equal:[eq(test.t1.a, test.t2.b)] |
-	| ├─TableReader_20         | 9990.00  | root | data:Selection_19                                                  |
-	| │ └─Selection_19         | 9990.00  | cop  | not(isnull(test.t1.a))                                             |
-	| │   └─TableScan_18       | 10000.00 | cop  | table:t2, range:[-inf,+inf], keep order:false, stats:pseudo        |
-	| └─TableReader_17         | 9990.00  | root | data:Selection_16                                                  |
-	|   └─Selection_16         | 9990.00  | cop  | not(isnull(test.t2.b))                                             |
-	|     └─TableScan_15       | 10000.00 | cop  | table:t1, range:[-inf,+inf], keep order:false, stats:pseudo        |
-	+--------------------------+----------+------+--------------------------------------------------------------------+
+	+------------------------------+----------+-----------+---------------+--------------------------------------------+
+	| id                           | estRows  | task      | access object | operator info                              |
+	+------------------------------+----------+-----------+---------------+--------------------------------------------+
+	| HashJoin_22                  | 12487.50 | root      |               | inner join, equal:[eq(test.t.a, test.t.b)] |
+	| ├─TableReader_26(Build)      | 9990.00  | root      |               | data:Selection_25                          |
+	| │ └─Selection_25             | 9990.00  | cop[tikv] |               | not(isnull(test.t.b))                      |
+	| │   └─TableFullScan_24       | 10000.00 | cop[tikv] | table:t1      | keep order:false, stats:pseudo             |
+	| └─TableReader_29(Probe)      | 9990.00  | root      |               | data:Selection_28                          |
+	|   └─Selection_28             | 9990.00  | cop[tikv] |               | not(isnull(test.t.a))                      |
+	|     └─TableFullScan_27       | 10000.00 | cop[tikv] | table:t2      | keep order:false, stats:pseudo             |
+	+------------------------------+----------+-----------+---------------+--------------------------------------------+
 """
 
-
 print(parse_text(explain_text))
+
+
+# explain_text = """
+# 	+--------------------------+----------+------+--------------------------------------------------------------------+
+# 	| id                       | count    | task | operator info                                                      |
+# 	+--------------------------+----------+------+--------------------------------------------------------------------+
+# 	| HashLeftJoin_13          | 12487.50 | root | inner join, inner:TableReader_17, equal:[eq(test.t1.a, test.t2.b)] |
+# 	| ├─TableReader_20         | 9990.00  | root | data:Selection_19                                                  |
+# 	| │ └─Selection_19         | 9990.00  | cop  | not(isnull(test.t1.a))                                             |
+# 	| │   └─TableScan_18       | 10000.00 | cop  | table:t2, range:[-inf,+inf], keep order:false, stats:pseudo        |
+# 	| └─TableReader_17         | 9990.00  | root | data:Selection_16                                                  |
+# 	|   └─Selection_16         | 9990.00  | cop  | not(isnull(test.t2.b))                                             |
+# 	|     └─TableScan_15       | 10000.00 | cop  | table:t1, range:[-inf,+inf], keep order:false, stats:pseudo        |
+# 	+--------------------------+----------+------+--------------------------------------------------------------------+
+# """
 
 # original output:
 # {
