@@ -22,7 +22,7 @@ def trim_and_split_explain_result(explain_result):
             if p == 3:
                 break
     if p != 3:
-        return None, Exception("invalid explain result")
+        raise Exception("invalid explain result")
 
     return lines[idx[0] : idx[2] + 1]
 
@@ -31,8 +31,22 @@ def split_rows(rows):
     results = []
     for row in rows:
         cols = row.split("|")
-        cols = [c.strip().replace("└─", "") for c in cols[1:-1]]
-        results.append(cols)
+        cols = [
+            c.strip().replace("└─", "").replace("├─", "").replace("│", "").strip()
+            for c in cols[1:-1]
+        ]
+        if cols and any(
+            s in cols[0].lower()
+            for s in [
+                "top",
+                "scan",
+                "join",
+                "agg",
+                "sort",
+                "group",
+            ]  # Index relevant operators
+        ):
+            results.append(cols)
     return results
 
 
@@ -50,17 +64,36 @@ def parse_text(explain_text):
 
 
 explain_text = """
-+-------------------------+----------+-----------+---------------+--------------------------------+
-| id                      | estRows  | task      | access object | operator info                  |
-+-------------------------+----------+-----------+---------------+--------------------------------+
-| TableReader_7           | 10.00    | root      |               | data:Selection_6               |
-| └─Selection_6           | 10.00    | cop[tikv] |               | eq(test.t.c, 10)               |
-|   └─TableFullScan_5     | 10000.00 | cop[tikv] | table:t       | keep order:false, stats:pseudo |
-+-------------------------+----------+-----------+---------------+--------------------------------+
+	+--------------------------+----------+------+--------------------------------------------------------------------+
+	| id                       | count    | task | operator info                                                      |
+	+--------------------------+----------+------+--------------------------------------------------------------------+
+	| HashLeftJoin_13          | 12487.50 | root | inner join, inner:TableReader_17, equal:[eq(test.t1.a, test.t2.b)] |
+	| ├─TableReader_20         | 9990.00  | root | data:Selection_19                                                  |
+	| │ └─Selection_19         | 9990.00  | cop  | not(isnull(test.t1.a))                                             |
+	| │   └─TableScan_18       | 10000.00 | cop  | table:t2, range:[-inf,+inf], keep order:false, stats:pseudo        |
+	| └─TableReader_17         | 9990.00  | root | data:Selection_16                                                  |
+	|   └─Selection_16         | 9990.00  | cop  | not(isnull(test.t2.b))                                             |
+	|     └─TableScan_15       | 10000.00 | cop  | table:t1, range:[-inf,+inf], keep order:false, stats:pseudo        |
+	+--------------------------+----------+------+--------------------------------------------------------------------+
 """
 
 
 print(parse_text(explain_text))
 
+# original output:
+# {
+#     "HashLeftJoin_13": [12487.5, ["root", "inner join, inner:TableReader_17, equal:[eq(test.t1.a, test.t2.b)]"]],
+#     "TableReader_20": [9990.0, ["root", "data:Selection_19"]],
+#     "Selection_19": [9990.0, ["cop", "not(isnull(test.t1.a))"]],
+#     "TableScan_18": [10000.0, ["cop", "table:t2, range:[-inf,+inf], keep order:false, stats:pseudo"]],
+#     "TableReader_17": [9990.0, ["root", "data:Selection_16"]],
+#     "Selection_16": [9990.0, ["cop", "not(isnull(test.t2.b))"]],
+#     "TableScan_15": [10000.0, ["cop", "table:t1, range:[-inf,+inf], keep order:false, stats:pseudo"]]
+# }
+
 # output:
-# {"TableReader_7": [10.0, ["root", "", "data:Selection_6"]], "Selection_6": [10.0, ["cop[tikv]", "", "eq(test.t.c, 10)"]], "TableFullScan_5": [10000.0, ["cop[tikv]", "table:t", "keep order:false, stats:pseudo"]]}
+# {
+#     "HashLeftJoin_13": [12487.5, ["root", "inner join, inner:TableReader_17, equal:[eq(test.t1.a, test.t2.b)]"]],
+#     "TableScan_18": [10000.0, ["cop", "table:t2, range:[-inf,+inf], keep order:false, stats:pseudo"]],
+#     "TableScan_15": [10000.0, ["cop", "table:t1, range:[-inf,+inf], keep order:false, stats:pseudo"]]
+# }
