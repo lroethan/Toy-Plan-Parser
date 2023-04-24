@@ -1,0 +1,146 @@
+SELECT MIN(mc.note) AS production_note, MIN(t.title) AS movie_title, MIN(t.production_year) AS movie_year FROM company_type AS ct, info_type AS it, movie_companies AS mc, movie_info_idx AS mi_idx, title AS t WHERE ct.kind = 'production companies' AND it.info = 'top 250 rank' AND mc.note  not like '%(as Metro-Goldwyn-Mayer Pictures)%' and (mc.note like '%(co-production)%' or mc.note like '%(presents)%') AND ct.id = mc.company_type_id AND t.id = mc.movie_id AND t.id = mi_idx.movie_id AND mc.movie_id = mi_idx.movie_id AND it.id = mi_idx.info_type_id;
+
+[
+    {
+        "id": "HashAgg_21",
+        "estRows": "1.00",
+        "taskType": "root",
+        "operatorInfo": "funcs:min(imdbload.movie_companies.note)->Column#27, funcs:min(imdbload.title.title)->Column#28, funcs:min(imdbload.title.production_year)->Column#29",
+        "subOperators": [
+            {
+                "id": "IndexJoin_28",
+                "estRows": "426553.00",
+                "taskType": "root",
+                "operatorInfo": "inner join, inner:TableReader_25, outer key:imdbload.movie_companies.movie_id, imdbload.movie_info_idx.movie_id, inner key:imdbload.title.id, imdbload.title.id, equal cond:eq(imdbload.movie_companies.movie_id, imdbload.title.id), eq(imdbload.movie_info_idx.movie_id, imdbload.title.id)",
+                "subOperators": [
+                    {
+                        "id": "HashJoin_45(Build)",
+                        "estRows": "426553.00",
+                        "taskType": "root",
+                        "operatorInfo": "inner join, equal:[eq(imdbload.movie_info_idx.info_type_id, imdbload.info_type.id)]",
+                        "subOperators": [
+                            {
+                                "id": "TableReader_72(Build)",
+                                "estRows": "1.00",
+                                "taskType": "root",
+                                "operatorInfo": "data:Selection_71",
+                                "subOperators": [
+                                    {
+                                        "id": "Selection_71",
+                                        "estRows": "1.00",
+                                        "taskType": "cop[tikv]",
+                                        "operatorInfo": "eq(imdbload.info_type.info, \"top 250 rank\")",
+                                        "subOperators": [
+                                            {
+                                                "id": "TableFullScan_70",
+                                                "estRows": "113.00",
+                                                "taskType": "cop[tikv]",
+                                                "accessObject": "table:it",
+                                                "operatorInfo": "keep order:false"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "id": "HashJoin_47(Probe)",
+                                "estRows": "2132765.00",
+                                "taskType": "root",
+                                "operatorInfo": "inner join, equal:[eq(imdbload.movie_companies.movie_id, imdbload.movie_info_idx.movie_id)]",
+                                "subOperators": [
+                                    {
+                                        "id": "TableReader_69(Build)",
+                                        "estRows": "1380035.00",
+                                        "taskType": "root",
+                                        "operatorInfo": "data:TableFullScan_68",
+                                        "subOperators": [
+                                            {
+                                                "id": "TableFullScan_68",
+                                                "estRows": "1380035.00",
+                                                "taskType": "cop[tikv]",
+                                                "accessObject": "table:mi_idx",
+                                                "operatorInfo": "keep order:false"
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "id": "HashJoin_61(Probe)",
+                                        "estRows": "1304564.50",
+                                        "taskType": "root",
+                                        "operatorInfo": "inner join, equal:[eq(imdbload.company_type.id, imdbload.movie_companies.company_type_id)]",
+                                        "subOperators": [
+                                            {
+                                                "id": "TableReader_67(Build)",
+                                                "estRows": "1.00",
+                                                "taskType": "root",
+                                                "operatorInfo": "data:Selection_66",
+                                                "subOperators": [
+                                                    {
+                                                        "id": "Selection_66",
+                                                        "estRows": "1.00",
+                                                        "taskType": "cop[tikv]",
+                                                        "operatorInfo": "eq(imdbload.company_type.kind, \"production companies\")",
+                                                        "subOperators": [
+                                                            {
+                                                                "id": "TableFullScan_65",
+                                                                "estRows": "4.00",
+                                                                "taskType": "cop[tikv]",
+                                                                "accessObject": "table:ct",
+                                                                "operatorInfo": "keep order:false"
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "id": "TableReader_64(Probe)",
+                                                "estRows": "2003811.07",
+                                                "taskType": "root",
+                                                "operatorInfo": "data:Selection_63",
+                                                "subOperators": [
+                                                    {
+                                                        "id": "Selection_63",
+                                                        "estRows": "2003811.07",
+                                                        "taskType": "cop[tikv]",
+                                                        "operatorInfo": "not(like(imdbload.movie_companies.note, \"%(as Metro-Goldwyn-Mayer Pictures)%\", 92)), or(like(imdbload.movie_companies.note, \"%(co-production)%\", 92), like(imdbload.movie_companies.note, \"%(presents)%\", 92))",
+                                                        "subOperators": [
+                                                            {
+                                                                "id": "TableFullScan_62",
+                                                                "estRows": "2609129.00",
+                                                                "taskType": "cop[tikv]",
+                                                                "accessObject": "table:mc",
+                                                                "operatorInfo": "keep order:false"
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id": "TableReader_25(Probe)",
+                        "estRows": "426553.00",
+                        "taskType": "root",
+                        "operatorInfo": "data:TableRangeScan_24",
+                        "subOperators": [
+                            {
+                                "id": "TableRangeScan_24",
+                                "estRows": "426553.00",
+                                "taskType": "cop[tikv]",
+                                "accessObject": "table:t",
+                                "operatorInfo": "range: decided by [imdbload.movie_companies.movie_id imdbload.movie_info_idx.movie_id], keep order:false"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]
+
+
+{"0_id": "HashAgg_21", "0_estRows": "1.00", "0_taskType": "root", "0_operatorInfo": "funcs:min(imdbload.movie_companies.note)->Column#27, funcs:min(imdbload.title.title)->Column#28, funcs:min(imdbload.title.production_year)->Column#29", "0_subOperators_0_id": "IndexJoin_28", "0_subOperators_0_estRows": "426553.00", "0_subOperators_0_taskType": "root", "0_subOperators_0_operatorInfo": "inner join, inner:TableReader_25, outer key:imdbload.movie_companies.movie_id, imdbload.movie_info_idx.movie_id, inner key:imdbload.title.id, imdbload.title.id, equal cond:eq(imdbload.movie_companies.movie_id, imdbload.title.id), eq(imdbload.movie_info_idx.movie_id, imdbload.title.id)", "0_subOperators_0_subOperators_0_id": "HashJoin_45(Build)", "0_subOperators_0_subOperators_0_estRows": "426553.00", "0_subOperators_0_subOperators_0_taskType": "root", "0_subOperators_0_subOperators_0_operatorInfo": "inner join, equal:[eq(imdbload.movie_info_idx.info_type_id, imdbload.info_type.id)]", "0_subOperators_0_subOperators_0_subOperators_0_id": "TableReader_72(Build)", "0_subOperators_0_subOperators_0_subOperators_0_estRows": "1.00", "0_subOperators_0_subOperators_0_subOperators_0_taskType": "root", "0_subOperators_0_subOperators_0_subOperators_0_operatorInfo": "data:Selection_71", "0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_id": "Selection_71", "0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_estRows": "1.00", "0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_taskType": "cop[tikv]", "0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_operatorInfo": "eq(imdbload.info_type.info, \"top 250 rank\")", "0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_id": "TableFullScan_70", "0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_estRows": "113.00", "0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_taskType": "cop[tikv]", "0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_accessObject": "table:it", "0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_operatorInfo": "keep order:false", "0_subOperators_0_subOperators_0_subOperators_1_id": "HashJoin_47(Probe)", "0_subOperators_0_subOperators_0_subOperators_1_estRows": "2132765.00", "0_subOperators_0_subOperators_0_subOperators_1_taskType": "root", "0_subOperators_0_subOperators_0_subOperators_1_operatorInfo": "inner join, equal:[eq(imdbload.movie_companies.movie_id, imdbload.movie_info_idx.movie_id)]", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_0_id": "TableReader_69(Build)", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_0_estRows": "1380035.00", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_0_taskType": "root", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_0_operatorInfo": "data:TableFullScan_68", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_0_subOperators_0_id": "TableFullScan_68", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_0_subOperators_0_estRows": "1380035.00", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_0_subOperators_0_taskType": "cop[tikv]", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_0_subOperators_0_accessObject": "table:mi_idx", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_0_subOperators_0_operatorInfo": "keep order:false", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_id": "HashJoin_61(Probe)", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_estRows": "1304564.50", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_taskType": "root", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_operatorInfo": "inner join, equal:[eq(imdbload.company_type.id, imdbload.movie_companies.company_type_id)]", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_id": "TableReader_67(Build)", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_estRows": "1.00", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_taskType": "root", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_operatorInfo": "data:Selection_66", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_id": "Selection_66", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_estRows": "1.00", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_taskType": "cop[tikv]", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_operatorInfo": "eq(imdbload.company_type.kind, \"production companies\")", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_subOperators_0_id": "TableFullScan_65", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_subOperators_0_estRows": "4.00", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_subOperators_0_taskType": "cop[tikv]", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_subOperators_0_accessObject": "table:ct", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_subOperators_0_operatorInfo": "keep order:false", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_id": "TableReader_64(Probe)", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_estRows": "2003811.07", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_taskType": "root", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_operatorInfo": "data:Selection_63", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_subOperators_0_id": "Selection_63", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_subOperators_0_estRows": "2003811.07", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_subOperators_0_taskType": "cop[tikv]", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_subOperators_0_operatorInfo": "not(like(imdbload.movie_companies.note, \"%(as Metro-Goldwyn-Mayer Pictures)%\", 92)), or(like(imdbload.movie_companies.note, \"%(co-production)%\", 92), like(imdbload.movie_companies.note, \"%(presents)%\", 92))", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_subOperators_0_subOperators_0_id": "TableFullScan_62", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_subOperators_0_subOperators_0_estRows": "2609129.00", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_subOperators_0_subOperators_0_taskType": "cop[tikv]", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_subOperators_0_subOperators_0_accessObject": "table:mc", "0_subOperators_0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_subOperators_0_subOperators_0_operatorInfo": "keep order:false", "0_subOperators_0_subOperators_1_id": "TableReader_25(Probe)", "0_subOperators_0_subOperators_1_estRows": "426553.00", "0_subOperators_0_subOperators_1_taskType": "root", "0_subOperators_0_subOperators_1_operatorInfo": "data:TableRangeScan_24", "0_subOperators_0_subOperators_1_subOperators_0_id": "TableRangeScan_24", "0_subOperators_0_subOperators_1_subOperators_0_estRows": "426553.00", "0_subOperators_0_subOperators_1_subOperators_0_taskType": "cop[tikv]", "0_subOperators_0_subOperators_1_subOperators_0_accessObject": "table:t", "0_subOperators_0_subOperators_1_subOperators_0_operatorInfo": "range: decided by [imdbload.movie_companies.movie_id imdbload.movie_info_idx.movie_id], keep order:false"}

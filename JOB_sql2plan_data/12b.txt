@@ -1,0 +1,231 @@
+SELECT MIN(mi.info) AS budget, MIN(t.title) AS unsuccsessful_movie FROM company_name AS cn, company_type AS ct, info_type AS it1, info_type AS it2, movie_companies AS mc, movie_info AS mi, movie_info_idx AS mi_idx, title AS t WHERE cn.country_code ='[us]' AND ct.kind  is not NULL and (ct.kind ='production companies' or ct.kind = 'distributors') AND it1.info ='budget' AND it2.info ='bottom 10 rank' AND t.production_year >2000 AND (t.title LIKE 'Birdemic%' OR t.title LIKE '%Movie%') AND t.id = mi.movie_id AND t.id = mi_idx.movie_id AND mi.info_type_id = it1.id AND mi_idx.info_type_id = it2.id AND t.id = mc.movie_id AND ct.id = mc.company_type_id AND cn.id = mc.company_id AND mc.movie_id = mi.movie_id AND mc.movie_id = mi_idx.movie_id AND mi.movie_id = mi_idx.movie_id;
+
+[
+    {
+        "id": "HashAgg_33",
+        "estRows": "1.00",
+        "taskType": "root",
+        "operatorInfo": "funcs:min(imdbload.movie_info.info)->Column#41, funcs:min(imdbload.title.title)->Column#42",
+        "subOperators": [
+            {
+                "id": "HashJoin_47",
+                "estRows": "100778.87",
+                "taskType": "root",
+                "operatorInfo": "inner join, equal:[eq(imdbload.movie_companies.company_type_id, imdbload.company_type.id)]",
+                "subOperators": [
+                    {
+                        "id": "TableReader_125(Build)",
+                        "estRows": "2.00",
+                        "taskType": "root",
+                        "operatorInfo": "data:Selection_124",
+                        "subOperators": [
+                            {
+                                "id": "Selection_124",
+                                "estRows": "2.00",
+                                "taskType": "cop[tikv]",
+                                "operatorInfo": "not(isnull(imdbload.company_type.kind)), or(eq(imdbload.company_type.kind, \"production companies\"), eq(imdbload.company_type.kind, \"distributors\"))",
+                                "subOperators": [
+                                    {
+                                        "id": "TableFullScan_123",
+                                        "estRows": "4.00",
+                                        "taskType": "cop[tikv]",
+                                        "accessObject": "table:ct",
+                                        "operatorInfo": "keep order:false"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "id": "HashJoin_60(Probe)",
+                        "estRows": "100778.87",
+                        "taskType": "root",
+                        "operatorInfo": "inner join, equal:[eq(imdbload.movie_companies.company_id, imdbload.company_name.id)]",
+                        "subOperators": [
+                            {
+                                "id": "TableReader_122(Build)",
+                                "estRows": "79708.00",
+                                "taskType": "root",
+                                "operatorInfo": "data:Selection_121",
+                                "subOperators": [
+                                    {
+                                        "id": "Selection_121",
+                                        "estRows": "79708.00",
+                                        "taskType": "cop[tikv]",
+                                        "operatorInfo": "eq(imdbload.company_name.country_code, \"[us]\")",
+                                        "subOperators": [
+                                            {
+                                                "id": "TableFullScan_120",
+                                                "estRows": "234997.00",
+                                                "taskType": "cop[tikv]",
+                                                "accessObject": "table:cn",
+                                                "operatorInfo": "keep order:false"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "id": "HashJoin_63(Probe)",
+                                "estRows": "296687.51",
+                                "taskType": "root",
+                                "operatorInfo": "inner join, equal:[eq(imdbload.movie_info.movie_id, imdbload.movie_companies.movie_id) eq(imdbload.movie_info_idx.movie_id, imdbload.movie_companies.movie_id) eq(imdbload.title.id, imdbload.movie_companies.movie_id)]",
+                                "subOperators": [
+                                    {
+                                        "id": "HashJoin_75(Build)",
+                                        "estRows": "124984.21",
+                                        "taskType": "root",
+                                        "operatorInfo": "inner join, equal:[eq(imdbload.movie_info_idx.info_type_id, imdbload.info_type.id)]",
+                                        "subOperators": [
+                                            {
+                                                "id": "TableReader_117(Build)",
+                                                "estRows": "1.00",
+                                                "taskType": "root",
+                                                "operatorInfo": "data:Selection_116",
+                                                "subOperators": [
+                                                    {
+                                                        "id": "Selection_116",
+                                                        "estRows": "1.00",
+                                                        "taskType": "cop[tikv]",
+                                                        "operatorInfo": "eq(imdbload.info_type.info, \"bottom 10 rank\")",
+                                                        "subOperators": [
+                                                            {
+                                                                "id": "TableFullScan_115",
+                                                                "estRows": "113.00",
+                                                                "taskType": "cop[tikv]",
+                                                                "accessObject": "table:it2",
+                                                                "operatorInfo": "keep order:false"
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "id": "HashJoin_78(Probe)",
+                                                "estRows": "624921.03",
+                                                "taskType": "root",
+                                                "operatorInfo": "inner join, equal:[eq(imdbload.movie_info.movie_id, imdbload.movie_info_idx.movie_id) eq(imdbload.title.id, imdbload.movie_info_idx.movie_id)]",
+                                                "subOperators": [
+                                                    {
+                                                        "id": "IndexJoin_85(Build)",
+                                                        "estRows": "208953.80",
+                                                        "taskType": "root",
+                                                        "operatorInfo": "inner join, inner:TableReader_81, outer key:imdbload.movie_info.movie_id, inner key:imdbload.title.id, equal cond:eq(imdbload.movie_info.movie_id, imdbload.title.id)",
+                                                        "subOperators": [
+                                                            {
+                                                                "id": "HashJoin_104(Build)",
+                                                                "estRows": "208953.80",
+                                                                "taskType": "root",
+                                                                "operatorInfo": "inner join, equal:[eq(imdbload.info_type.id, imdbload.movie_info.info_type_id)]",
+                                                                "subOperators": [
+                                                                    {
+                                                                        "id": "TableReader_109(Build)",
+                                                                        "estRows": "1.00",
+                                                                        "taskType": "root",
+                                                                        "operatorInfo": "data:Selection_108",
+                                                                        "subOperators": [
+                                                                            {
+                                                                                "id": "Selection_108",
+                                                                                "estRows": "1.00",
+                                                                                "taskType": "cop[tikv]",
+                                                                                "operatorInfo": "eq(imdbload.info_type.info, \"budget\")",
+                                                                                "subOperators": [
+                                                                                    {
+                                                                                        "id": "TableFullScan_107",
+                                                                                        "estRows": "113.00",
+                                                                                        "taskType": "cop[tikv]",
+                                                                                        "accessObject": "table:it1",
+                                                                                        "operatorInfo": "keep order:false"
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    {
+                                                                        "id": "TableReader_106(Probe)",
+                                                                        "estRows": "14835720.00",
+                                                                        "taskType": "root",
+                                                                        "operatorInfo": "data:TableFullScan_105",
+                                                                        "subOperators": [
+                                                                            {
+                                                                                "id": "TableFullScan_105",
+                                                                                "estRows": "14835720.00",
+                                                                                "taskType": "cop[tikv]",
+                                                                                "accessObject": "table:mi",
+                                                                                "operatorInfo": "keep order:false"
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "id": "TableReader_81(Probe)",
+                                                                "estRows": "88558.39",
+                                                                "taskType": "root",
+                                                                "operatorInfo": "data:Selection_80",
+                                                                "subOperators": [
+                                                                    {
+                                                                        "id": "Selection_80",
+                                                                        "estRows": "88558.39",
+                                                                        "taskType": "cop[tikv]",
+                                                                        "operatorInfo": "gt(imdbload.title.production_year, 2000), or(like(imdbload.title.title, \"Birdemic%\", 92), like(imdbload.title.title, \"%Movie%\", 92))",
+                                                                        "subOperators": [
+                                                                            {
+                                                                                "id": "TableRangeScan_79",
+                                                                                "estRows": "208953.80",
+                                                                                "taskType": "cop[tikv]",
+                                                                                "accessObject": "table:t",
+                                                                                "operatorInfo": "range: decided by [imdbload.movie_info.movie_id], keep order:false"
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "id": "TableReader_114(Probe)",
+                                                        "estRows": "1380035.00",
+                                                        "taskType": "root",
+                                                        "operatorInfo": "data:TableFullScan_113",
+                                                        "subOperators": [
+                                                            {
+                                                                "id": "TableFullScan_113",
+                                                                "estRows": "1380035.00",
+                                                                "taskType": "cop[tikv]",
+                                                                "accessObject": "table:mi_idx",
+                                                                "operatorInfo": "keep order:false"
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "id": "TableReader_119(Probe)",
+                                        "estRows": "2609129.00",
+                                        "taskType": "root",
+                                        "operatorInfo": "data:TableFullScan_118",
+                                        "subOperators": [
+                                            {
+                                                "id": "TableFullScan_118",
+                                                "estRows": "2609129.00",
+                                                "taskType": "cop[tikv]",
+                                                "accessObject": "table:mc",
+                                                "operatorInfo": "keep order:false"
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]
+
+
+{"0_id": "HashAgg_33", "0_estRows": "1.00", "0_taskType": "root", "0_operatorInfo": "funcs:min(imdbload.movie_info.info)->Column#41, funcs:min(imdbload.title.title)->Column#42", "0_subOperators_0_id": "HashJoin_47", "0_subOperators_0_estRows": "100778.87", "0_subOperators_0_taskType": "root", "0_subOperators_0_operatorInfo": "inner join, equal:[eq(imdbload.movie_companies.company_type_id, imdbload.company_type.id)]", "0_subOperators_0_subOperators_0_id": "TableReader_125(Build)", "0_subOperators_0_subOperators_0_estRows": "2.00", "0_subOperators_0_subOperators_0_taskType": "root", "0_subOperators_0_subOperators_0_operatorInfo": "data:Selection_124", "0_subOperators_0_subOperators_0_subOperators_0_id": "Selection_124", "0_subOperators_0_subOperators_0_subOperators_0_estRows": "2.00", "0_subOperators_0_subOperators_0_subOperators_0_taskType": "cop[tikv]", "0_subOperators_0_subOperators_0_subOperators_0_operatorInfo": "not(isnull(imdbload.company_type.kind)), or(eq(imdbload.company_type.kind, \"production companies\"), eq(imdbload.company_type.kind, \"distributors\"))", "0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_id": "TableFullScan_123", "0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_estRows": "4.00", "0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_taskType": "cop[tikv]", "0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_accessObject": "table:ct", "0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_operatorInfo": "keep order:false", "0_subOperators_0_subOperators_1_id": "HashJoin_60(Probe)", "0_subOperators_0_subOperators_1_estRows": "100778.87", "0_subOperators_0_subOperators_1_taskType": "root", "0_subOperators_0_subOperators_1_operatorInfo": "inner join, equal:[eq(imdbload.movie_companies.company_id, imdbload.company_name.id)]", "0_subOperators_0_subOperators_1_subOperators_0_id": "TableReader_122(Build)", "0_subOperators_0_subOperators_1_subOperators_0_estRows": "79708.00", "0_subOperators_0_subOperators_1_subOperators_0_taskType": "root", "0_subOperators_0_subOperators_1_subOperators_0_operatorInfo": "data:Selection_121", "0_subOperators_0_subOperators_1_subOperators_0_subOperators_0_id": "Selection_121", "0_subOperators_0_subOperators_1_subOperators_0_subOperators_0_estRows": "79708.00", "0_subOperators_0_subOperators_1_subOperators_0_subOperators_0_taskType": "cop[tikv]", "0_subOperators_0_subOperators_1_subOperators_0_subOperators_0_operatorInfo": "eq(imdbload.company_name.country_code, \"[us]\")", "0_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_0_id": "TableFullScan_120", "0_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_0_estRows": "234997.00", "0_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_0_taskType": "cop[tikv]", "0_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_0_accessObject": "table:cn", "0_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_0_operatorInfo": "keep order:false", "0_subOperators_0_subOperators_1_subOperators_1_id": "HashJoin_63(Probe)", "0_subOperators_0_subOperators_1_subOperators_1_estRows": "296687.51", "0_subOperators_0_subOperators_1_subOperators_1_taskType": "root", "0_subOperators_0_subOperators_1_subOperators_1_operatorInfo": "inner join, equal:[eq(imdbload.movie_info.movie_id, imdbload.movie_companies.movie_id) eq(imdbload.movie_info_idx.movie_id, imdbload.movie_companies.movie_id) eq(imdbload.title.id, imdbload.movie_companies.movie_id)]", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_id": "HashJoin_75(Build)", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_estRows": "124984.21", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_taskType": "root", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_operatorInfo": "inner join, equal:[eq(imdbload.movie_info_idx.info_type_id, imdbload.info_type.id)]", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_id": "TableReader_117(Build)", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_estRows": "1.00", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_taskType": "root", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_operatorInfo": "data:Selection_116", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_subOperators_0_id": "Selection_116", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_subOperators_0_estRows": "1.00", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_subOperators_0_taskType": "cop[tikv]", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_subOperators_0_operatorInfo": "eq(imdbload.info_type.info, \"bottom 10 rank\")", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_subOperators_0_subOperators_0_id": "TableFullScan_115", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_subOperators_0_subOperators_0_estRows": "113.00", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_subOperators_0_subOperators_0_taskType": "cop[tikv]", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_subOperators_0_subOperators_0_accessObject": "table:it2", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_0_subOperators_0_subOperators_0_operatorInfo": "keep order:false", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_id": "HashJoin_78(Probe)", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_estRows": "624921.03", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_taskType": "root", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_operatorInfo": "inner join, equal:[eq(imdbload.movie_info.movie_id, imdbload.movie_info_idx.movie_id) eq(imdbload.title.id, imdbload.movie_info_idx.movie_id)]", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_id": "IndexJoin_85(Build)", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_estRows": "208953.80", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_taskType": "root", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_operatorInfo": "inner join, inner:TableReader_81, outer key:imdbload.movie_info.movie_id, inner key:imdbload.title.id, equal cond:eq(imdbload.movie_info.movie_id, imdbload.title.id)", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_id": "HashJoin_104(Build)", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_estRows": "208953.80", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_taskType": "root", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_operatorInfo": "inner join, equal:[eq(imdbload.info_type.id, imdbload.movie_info.info_type_id)]", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_0_id": "TableReader_109(Build)", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_0_estRows": "1.00", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_0_taskType": "root", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_0_operatorInfo": "data:Selection_108", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_0_subOperators_0_id": "Selection_108", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_0_subOperators_0_estRows": "1.00", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_0_subOperators_0_taskType": "cop[tikv]", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_0_subOperators_0_operatorInfo": "eq(imdbload.info_type.info, \"budget\")", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_id": "TableFullScan_107", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_estRows": "113.00", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_taskType": "cop[tikv]", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_accessObject": "table:it1", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_0_subOperators_0_subOperators_0_operatorInfo": "keep order:false", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_1_id": "TableReader_106(Probe)", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_1_estRows": "14835720.00", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_1_taskType": "root", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_1_operatorInfo": "data:TableFullScan_105", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_1_subOperators_0_id": "TableFullScan_105", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_1_subOperators_0_estRows": "14835720.00", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_1_subOperators_0_taskType": "cop[tikv]", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_1_subOperators_0_accessObject": "table:mi", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_subOperators_1_subOperators_0_operatorInfo": "keep order:false", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_1_id": "TableReader_81(Probe)", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_1_estRows": "88558.39", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_1_taskType": "root", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_1_operatorInfo": "data:Selection_80", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_1_subOperators_0_id": "Selection_80", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_1_subOperators_0_estRows": "88558.39", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_1_subOperators_0_taskType": "cop[tikv]", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_1_subOperators_0_operatorInfo": "gt(imdbload.title.production_year, 2000), or(like(imdbload.title.title, \"Birdemic%\", 92), like(imdbload.title.title, \"%Movie%\", 92))", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_id": "TableRangeScan_79", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_estRows": "208953.80", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_taskType": "cop[tikv]", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_accessObject": "table:t", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_1_subOperators_0_subOperators_0_operatorInfo": "range: decided by [imdbload.movie_info.movie_id], keep order:false", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_1_id": "TableReader_114(Probe)", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_1_estRows": "1380035.00", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_1_taskType": "root", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_1_operatorInfo": "data:TableFullScan_113", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_1_subOperators_0_id": "TableFullScan_113", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_1_subOperators_0_estRows": "1380035.00", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_1_subOperators_0_taskType": "cop[tikv]", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_1_subOperators_0_accessObject": "table:mi_idx", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_0_subOperators_1_subOperators_1_subOperators_0_operatorInfo": "keep order:false", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_id": "TableReader_119(Probe)", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_estRows": "2609129.00", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_taskType": "root", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_operatorInfo": "data:TableFullScan_118", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_subOperators_0_id": "TableFullScan_118", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_subOperators_0_estRows": "2609129.00", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_subOperators_0_taskType": "cop[tikv]", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_subOperators_0_accessObject": "table:mc", "0_subOperators_0_subOperators_1_subOperators_1_subOperators_1_subOperators_0_operatorInfo": "keep order:false"}
